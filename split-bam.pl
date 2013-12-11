@@ -18,8 +18,10 @@ close $header_fh;
 open my $bam_fh, "-|", "samtools view $bam_file";
 while (<$bam_fh>) {
     my ( $machine_run, $lane ) = split /:/;
-    open $bam_out_fh{"$machine_run-$lane"}, ">", "$machine_run-$lane.sam"
-      unless exists $bam_out_fh{"$machine_run-$lane"};
+    unless ( exists $bam_out_fh{"$machine_run-$lane"} ) {
+        open $bam_out_fh{"$machine_run-$lane"}, ">", "$machine_run-$lane.sam";
+        print { $bam_out_fh{"$machine_run-$lane"} } @header;
+    }
     print { $bam_out_fh{"$machine_run-$lane"} } $_;
 }
 close $bam_fh;
