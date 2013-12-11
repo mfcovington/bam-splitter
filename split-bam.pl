@@ -11,6 +11,10 @@ use autodie;
 my $bam_file = $ARGV[0];
 my %bam_out_fh;
 
+open my $header_fh, "-|", "samtools view -H $bam_file";
+my @header = <$header_fh>;
+close $header_fh;
+
 open my $bam_fh, "-|", "samtools view $bam_file";
 while (<$bam_fh>) {
     my ( $machine_run, $lane ) = split /:/;
