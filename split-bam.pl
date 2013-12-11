@@ -20,14 +20,13 @@ open my $bam_fh, "-|", "samtools view $bam_file";
 my %bam_out_fh;
 while (<$bam_fh>) {
     my ( $machine_run, $lane ) = split /:/;
-    unless ( exists $bam_out_fh{"$machine_run-$lane"} ) {
-        my $bam_out = "$bam_id.$machine_run-$lane.bam";
-        open $bam_out_fh{"$machine_run-$lane"},
-          "|-", "samtools view -Sb - > $bam_out";
-        print { $bam_out_fh{"$machine_run-$lane"} } @header;
+    my $unique_id = "$machine_run-$lane";
+    unless ( exists $bam_out_fh{$unique_id} ) {
+        my $bam_out = "$bam_id.$unique_id.bam";
+        open $bam_out_fh{$unique_id}, "|-", "samtools view -Sb - > $bam_out";
+        print { $bam_out_fh{$unique_id} } @header;
     }
-    print { $bam_out_fh{"$machine_run-$lane"} } $_;
+    print { $bam_out_fh{$unique_id} } $_;
 }
 close $bam_fh;
-
 close $bam_out_fh{$_} for keys %bam_out_fh;
