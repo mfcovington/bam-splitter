@@ -7,20 +7,23 @@
 use strict;
 use warnings;
 use autodie;
+use File::Basename;
 
 my $bam_file = $ARGV[0];
-my %bam_out_fh;
+my ( $bam_id, $bam_path ) = fileparse( $bam_file, ".bam" );
 
 open my $header_fh, "-|", "samtools view -H $bam_file";
 my @header = <$header_fh>;
 close $header_fh;
 
 open my $bam_fh, "-|", "samtools view $bam_file";
+my %bam_out_fh;
 while (<$bam_fh>) {
     my ( $machine_run, $lane ) = split /:/;
     unless ( exists $bam_out_fh{"$machine_run-$lane"} ) {
+        my $bam_out = "$bam_id.$machine_run-$lane.bam";
         open $bam_out_fh{"$machine_run-$lane"},
-          "|-", "samtools view -Sb - > $machine_run-$lane.bam";
+          "|-", "samtools view -Sb - > $bam_out";
         print { $bam_out_fh{"$machine_run-$lane"} } @header;
     }
     print { $bam_out_fh{"$machine_run-$lane"} } $_;
